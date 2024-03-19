@@ -9,6 +9,7 @@ import { ConfigModule } from '@nestjs/config';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { NestApplication } from '@nestjs/core';
 import { authMiddleware } from './middleware/auth.middleware';
+import { MailerModule } from '@nestjs-modules/mailer';
 
 @Module({
   imports: [
@@ -25,6 +26,17 @@ import { authMiddleware } from './middleware/auth.middleware';
       database: 'task1',
       synchronize: true,
       logging: true,
+    }),
+    MailerModule.forRoot({
+      transport:{
+        host: 'smtp.gmail.com',
+        port: 465,
+        secure: true,
+        auth : {
+          user : String(process.env.USER),
+          pass : String(process.env.USER_PASS)
+        }
+      }
     }),
     UserModule, SiteModule],
   controllers: [AppController],

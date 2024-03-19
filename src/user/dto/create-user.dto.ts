@@ -22,6 +22,9 @@ export class CreateUserDto {
     @IsEmail()
     email : string;
 
+    @IsEmail()
+    destination : string;
+
     @IsString()
     @IsNotEmpty()
     @MinLength(8 , {message : 'password length must be atleast 8 characters.'})

@@ -1,26 +1,31 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req, Res } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, Res, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { User } from './entities/user.entity';
 
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('signup')
-  signup(@Body() createUserDto: CreateUserDto,@Req() req, @Res() res) {
+  signup(@Body() createUserDto: CreateUserDto,@Req() req, @Res() res) : Promise<User> {
     return this.userService.signup(createUserDto , req, res);
   }
 
   @Post('login')
-  login(@Body() loginUserDto : LoginUserDto) {
-    return this.userService.login(loginUserDto);
+  login(@Body() loginUserDto : LoginUserDto, @Req() req, @Res() res) : Promise<User>{
+    return this.userService.login(loginUserDto, req, res);
   }
 
+
+  @UseGuards(AuthGuard('magiclogin'))
   @Get('login/callback')
-  callback(){
-    
+  callback(@Req() req) : Promise<User>{
+    console.log(req.user)
+    return this.userService.verifyUser(req);
   }
 
   @Get()

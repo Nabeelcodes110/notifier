@@ -6,18 +6,16 @@ import * as parseUrl from 'url-parse';
 @Injectable()
 export class siteValidator implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
-
     const req = context.switchToHttp().getRequest();
     const { url } = req.body;
     
-    try {
-        const parsedUrl = new parseUrl(url);
-        if (!parsedUrl.protocol || !parsedUrl.hostname) {
-          throw new BadRequestException('Invalid URL');
-        }
-      } catch (error) {
-        throw new BadRequestException('Invalid URL');
+    const resp = fetch(url).then((data)=>{
+      if(!data.ok){
+        throw new BadRequestException('Invalid URL', 'Invalid URL entered')
       }
+    }).catch((err)=>{
+      throw new BadRequestException('Invalid URL', err)
+    })
 
     console.log('checked')
 
