@@ -7,9 +7,7 @@ import { UserModule } from 'src/user/user.module';
 import { User } from 'src/user/entities/user.entity';
 
 @Module({
-  imports : [
-    TypeOrmModule.forFeature([Site , User]),
-  ],
+  imports: [TypeOrmModule.forFeature([Site, User])],
   controllers: [SiteController],
   providers: [SiteService],
 })

@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req, Res, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Req,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { LoginUserDto } from './dto/login-user.dto';
@@ -11,20 +22,27 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post('signup')
-  signup(@Body() createUserDto: CreateUserDto,@Req() req, @Res() res) : Promise<User> {
-    return this.userService.signup(createUserDto , req, res);
+  signup(
+    @Body() createUserDto: CreateUserDto,
+    @Req() req,
+    @Res() res,
+  ): Promise<User> {
+    return this.userService.signup(createUserDto, req, res);
   }
 
   @Post('login')
-  login(@Body() loginUserDto : LoginUserDto, @Req() req, @Res() res) : Promise<User>{
+  login(
+    @Body() loginUserDto: LoginUserDto,
+    @Req() req,
+    @Res() res,
+  ): Promise<User> {
     return this.userService.login(loginUserDto, req, res);
   }
 
-
   @UseGuards(AuthGuard('magiclogin'))
   @Get('login/callback')
-  callback(@Req() req) : Promise<User>{
-    console.log(req.user)
+  callback(@Req() req): Promise<User> {
+    console.log(req.user);
     return this.userService.verifyUser(req);
   }
 
@@ -39,7 +57,7 @@ export class UserController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto : UpdateUserDto) {
+  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.userService.update(+id, updateUserDto);
   }
 

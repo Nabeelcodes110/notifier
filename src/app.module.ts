@@ -10,11 +10,12 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { NestApplication } from '@nestjs/core';
 import { authMiddleware } from './middleware/auth.middleware';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { BullModule } from '@nestjs/bull';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
-      isGlobal:true
+      isGlobal: true,
     }),
     TypeOrmModule.forRoot({
       type: 'postgres',
@@ -28,22 +29,30 @@ import { MailerModule } from '@nestjs-modules/mailer';
       logging: true,
     }),
     MailerModule.forRoot({
-      transport:{
+      transport: {
         host: 'smtp.gmail.com',
         port: 465,
         secure: true,
-        auth : {
-          user : String(process.env.USER),
-          pass : String(process.env.USER_PASS)
-        }
-      }
+        auth: {
+          user: String(process.env.USER),
+          pass: String(process.env.USER_PASS),
+        },
+      },
     }),
-    UserModule, SiteModule],
+    BullModule.forRoot({
+      redis : {
+        host : 'localhost',
+        port : 6379
+      } 
+    }),
+    UserModule,
+    SiteModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule implements NestModule{
-  configure(consumer : MiddlewareConsumer){
-    consumer.apply(authMiddleware).forRoutes('site')
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(authMiddleware).forRoutes('site');
   }
 }
