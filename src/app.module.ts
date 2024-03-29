@@ -11,6 +11,9 @@ import { NestApplication } from '@nestjs/core';
 import { authMiddleware } from './middleware/auth.middleware';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { BullModule } from '@nestjs/bull';
+import { ScheduleModule } from '@nestjs/schedule';
+import { SchedulerModule } from './scheduler/scheduler.module';
+import { InspectionConsumer } from './scheduler/queue.consumer';
 
 @Module({
   imports: [
@@ -39,17 +42,13 @@ import { BullModule } from '@nestjs/bull';
         },
       },
     }),
-    BullModule.forRoot({
-      redis : {
-        host : 'localhost',
-        port : 6379
-      } 
-    }),
+    ScheduleModule.forRoot(),
+    SchedulerModule,
     UserModule,
     SiteModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, InspectionConsumer],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

@@ -17,7 +17,6 @@ import { JwtService } from '@nestjs/jwt';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { MagicLinkStrategy } from './magicLink.service';
-// import MagicLoginStrategy from 'passport-magic-login';
 const salt = 10;
 
 @Injectable()
@@ -66,6 +65,7 @@ export class UserService {
   ): Promise<any> {
     const { email, password: pass } = loginUserDto;
     const user = await this.findUserByEmail(email);
+
 
     if (!user) {
       throw new UnauthorizedException('UserNotSignedUp', 'First Signup please');

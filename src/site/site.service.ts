@@ -15,7 +15,8 @@ export class SiteService {
   ) {}
 
   async create(createSiteDto: CreateSiteDto, req: Request): Promise<Site> {
-    const { id } = req.body['user'];
+    const { sub : id} = req.body['user'];
+    console.log(id)
     const { name, url } = createSiteDto;
 
     const isValid = await this.checkWebsite(url);
@@ -27,7 +28,8 @@ export class SiteService {
     const site = new Site();
     site.name = name;
     site.url = url;
-    const user = await this.userRepository.findOneBy(id);
+    const user = await this.userRepository.findOneBy({id});
+    console.log(user)
     site.owner = user;
     return this.siteRepository.save(site);
   }
