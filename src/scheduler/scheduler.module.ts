@@ -11,12 +11,6 @@ import { SiteModule } from 'src/site/site.module';
 @Module({
     imports : [
         TypeOrmModule.forFeature([Site]),
-        BullModule.forRoot({
-            redis : {
-              host : 'localhost',
-              port : 6379
-            } 
-          }),
         BullModule.registerQueue({
             name : 'inspectionQueue'
         }),

@@ -9,9 +9,11 @@ import { Queue } from 'bull';
 export class SchedulerService {
   constructor(private readonly queueService : InspectionService, @InjectQueue('inspectionQueue') private inspectionQueue: Queue){}
   private readonly logger = new Logger(SchedulerService.name);
+
+
   @Cron('*/10 * * * * *')
   async handleCron() {
     this.logger.debug('Called every 5 seconds');
-    this.queueService.addJobs()
+    await this.queueService.addJobs()
   }
 }

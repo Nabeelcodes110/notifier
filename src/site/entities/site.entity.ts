@@ -28,5 +28,6 @@ export class Site {
   lastFailure: Date;
 
   @ManyToOne((type) => User, (user) => user.sites)
+  @JoinColumn()
   owner: User;
 }

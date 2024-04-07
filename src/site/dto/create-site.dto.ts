@@ -5,6 +5,7 @@ import {
   IsInt,
   IsNotEmpty,
   IsString,
+  IsUrl,
   Matches,
   MaxLength,
   MinLength,
@@ -18,6 +19,6 @@ export class CreateSiteDto {
 
   @IsString()
   @IsNotEmpty()
-  @IsEmail()
+  @IsUrl()
   url: string;
 }

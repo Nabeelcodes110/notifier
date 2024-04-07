@@ -18,5 +18,6 @@ import { MagicLinkStrategy } from './magicLink.service';
   ],
   controllers: [UserController],
   providers: [UserService, MagicLinkStrategy],
+  exports : [UserService]
 })
 export class UserModule {}
