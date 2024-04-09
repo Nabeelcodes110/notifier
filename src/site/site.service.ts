@@ -8,14 +8,13 @@ import { User } from 'src/user/entities/user.entity';
 import { MailerService } from '@nestjs-modules/mailer';
 import axios from 'axios';
 import { InjectQueue } from '@nestjs/bull';
-import { Queue } from 'bull';
+import { Job, Queue } from 'bull';
 @Injectable()
 export class SiteService {
   constructor(
     @InjectRepository(Site) private readonly siteRepository: Repository<Site>,
     @InjectRepository(User) private readonly userRepository: Repository<User>,
     @InjectQueue('mailerQueue') private mailerQueue : Queue,
-    private mailerService : MailerService,
 
   ) {}
 
@@ -53,7 +52,7 @@ export class SiteService {
       if (response.status === 200) return site
     } catch (error) {
       console.error('Error checking website:', error);
-      return site
+      throw new Error(JSON.stringify(site))
     }
   }
 
@@ -93,15 +92,13 @@ export class SiteService {
   /*function to check the batch of sites
   if up and working then updates the last checked time
   else sends mail to the owner and updates the last failure time */
-  async queueCheck(job) {
+  async queueCheck(job : Job) {
     try{
       const {start, end} = job.data
 
       // find sites based on start end
       const sites = await this.siteRepository.createQueryBuilder('site').leftJoinAndSelect('site.owner' , 'user')
       .select(['site' , 'user.id']).skip(start).limit(end-start).getMany()
-
-
 
       if(!sites){
         // throw error
@@ -122,25 +119,30 @@ export class SiteService {
         else rejectedPromises.push(res)
       }
 
-      // handle succes
-      await Promise.all(successPromises.map(async (successPromise)=>{
-        successPromise.value.updatedAt = new Date()
-        await this.siteRepository.save(successPromise.value)
+      // handle success
+      if(successPromises.length>0){
+        await this.siteRepository.createQueryBuilder()
+        .update(Site)
+        .set({ updatedAt : new Date()})
+        .where("id IN (:...ids)", { ids: successPromises.map(site => site.value.id) })
+        .execute();
+      }
 
-      }))
+      // handle failure
+      if(rejectedPromises.length > 0){
+        await this.siteRepository.createQueryBuilder()
+          .update(Site)
+          .set({ lastFailure : new Date()})
+          .where("id IN (:...ids)", { ids: rejectedPromises.map(site => site.value.id) })
+          .execute();
+      }
 
-      
-      // error failure
       await Promise.all(rejectedPromises.map(async (rejectedPromise)=>{
         //add job to send mail to respective user
-        // this.mailerQueue.add('mail' , {
-        //   payload : JSON.stringify(rejectedPromise.reason)
-        // })
-        
-        //update the last failure time
-        rejectedPromise.reason.lastFailure = new Date()
-        await this.siteRepository.save(rejectedPromise.reason)
+        const reason = String(rejectedPromise.reason)
+        const site = JSON.parse(reason.substring(reason.indexOf('{')))
 
+        await this.mailerQueue.add('mail', site)
       }))
     }catch(error){
       throw new Error(error)
